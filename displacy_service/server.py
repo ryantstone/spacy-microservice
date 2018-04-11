@@ -18,7 +18,6 @@ from .parse import Parse, Entities
 load_dotenv(find_dotenv())
 MODELS = spacy.util.LANGUAGES.keys()
 MODEL = os.environ.get('MODEL_NAME')
-print(MODEL)
 
 try:
     unicode
@@ -48,21 +47,19 @@ class EntResource(object):
     def on_post(self, req, resp):
         req_body = req.stream.read()
         json_data = json.loads(req_body.decode('utf8'))
-        text = json_data.get('text')
-        model_name = MODEL
+        texts = json_data.get('text')
+        entities = []
+        for text in texts:
+            entities.append(EntResource.detect_entities(self, text))
+        print(entities)
+
+    def detect_entities(self, text):
         try:
-            model = get_model(model_name)
+            model = get_model(MODEL)
             entities = Entities(model, text)
-            print(text)
-            print(model_name)
-            print(entities.to_json())
-            resp.body = json.dumps(entities.to_json(), sort_keys=True,
-                                   indent=2)
-            resp.content_type = 'text/string'
-            resp.append_header('Access-Control-Allow-Origin', "*")
-            resp.status = falcon.HTTP_200
+            return entities.to_json
         except Exception:
-            resp.status = falcon.HTTP_500
+            raise Exception
 
 
 APP = falcon.API()
