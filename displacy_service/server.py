@@ -45,21 +45,24 @@ def get_ent_types(model):
 
 class EntResource(object):
     def on_post(self, req, resp):
-        req_body = req.stream.read()
-        json_data = json.loads(req_body.decode('utf8'))
-        texts = json_data.get('text')
-        entities = []
+        req_body    = req.stream.read()
+        json_data   = json.loads(req_body.decode('utf8'))
+        texts       = json_data.get('text')
+        entities    = []
+
         for text in texts:
             entities.append(EntResource.detect_entities(self, text))
-        print(entities)
+
+        output = {
+            'data': entities
+        }
+        print(json.dumps(output, sort_keys=True, indent=2))
 
     def detect_entities(self, text):
-        try:
-            model = get_model(MODEL)
-            entities = Entities(model, text)
-            return entities.to_json
-        except Exception:
-            raise Exception
+        model       = get_model(MODEL)
+        entities    = Entities(model, text)
+        # import code; code.interact(local=dict(globals(), **locals()))
+        return entities.to_json()
 
 
 APP = falcon.API()
