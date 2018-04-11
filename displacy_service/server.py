@@ -6,6 +6,7 @@ from pathlib import Path
 import falcon
 import spacy
 import json
+from dotenv import load_dotenv, find_dotenv
 import os
 
 from spacy.symbols import ENT_TYPE, TAG, DEP
@@ -14,9 +15,10 @@ import spacy.util
 
 from .parse import Parse, Entities
 
-
+load_dotenv(find_dotenv())
 MODELS = spacy.util.LANGUAGES.keys()
-MODEL = os.environ['MODEL_NAME']
+MODEL = os.environ.get('MODEL_NAME')
+print(MODEL)
 
 try:
     unicode
@@ -43,19 +45,17 @@ def get_ent_types(model):
 
 
 class EntResource(object):
-    """Parse text and return displaCy ent's expected output."""
     def on_post(self, req, resp):
         req_body = req.stream.read()
         json_data = json.loads(req_body.decode('utf8'))
         text = json_data.get('text')
-        model_name = _model
+        model_name = MODEL
         try:
             model = get_model(model_name)
             entities = Entities(model, text)
             print(text)
             print(model_name)
             print(entities.to_json())
-            import code; code.interact(local=dict(globals(), **locals()))
             resp.body = json.dumps(entities.to_json(), sort_keys=True,
                                    indent=2)
             resp.content_type = 'text/string'
