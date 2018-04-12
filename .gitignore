@@ -1,2 +1,3 @@
 model*
+displacy_service/__pycache__*
 .env
