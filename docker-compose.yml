@@ -1,0 +1,11 @@
+version: '2'
+services:
+  app:
+    tty: true
+    stdin_open: true
+    build: .
+    command: bash -c "python app.py"
+    volumes:
+      - .:/app
+    ports:
+      - 3000:3000
