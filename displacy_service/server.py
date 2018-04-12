@@ -35,11 +35,9 @@ def get_model(model_name):
 
 
 def get_ent_types(model):
-    '''List the available entity types in the model.'''
     labels = set()
     for move_name in model.parser.moves.move_names:
         labels.add(move_name.split('-')[-1])
-        print(labels)
     return sorted(list(labels))
 
 
@@ -51,17 +49,20 @@ class EntResource(object):
         entities    = []
 
         for text in texts:
-            entities.append(EntResource.detect_entities(self, text))
+            data = {
+                'text': text,
+                'entities': EntResource.detect_entities(self, text)
+            }
+            entities.append(data)
 
-        output = {
-            'data': entities
-        }
-        print(json.dumps(output, sort_keys=True, indent=2))
+        resp.append_header('Access-Control-Allow-Origin', "*")
+        output      = { 'data': entities }
+        resp.body   = json.dumps(output)
+        resp.status = falcon.HTTP_200
 
     def detect_entities(self, text):
         model       = get_model(MODEL)
         entities    = Entities(model, text)
-        # import code; code.interact(local=dict(globals(), **locals()))
         return entities.to_json()
 
 
